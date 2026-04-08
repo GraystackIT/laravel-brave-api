@@ -1,6 +1,6 @@
 # graystack/laravel-brave-api
 
-A Laravel package for the [Brave Search Images API](https://api.search.brave.com/), built on Saloon 4.
+A Laravel package for the [Brave Search Images API](https://api.search.brave.com/), built on [Saloon 4](https://docs.saloon.dev/).
 
 ## Requirements
 
