@@ -44,12 +44,6 @@
             "pestphp/pest-plugin": true
         }
     },
-    "repositories": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/GraystackIT/laravel-brave-api"
-        }
-    ],
     "minimum-stability": "stable",
     "prefer-stable": true
 }
