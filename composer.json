@@ -47,7 +47,7 @@
     "repositories": [
         {
           "type": "vcs",
-          "url": "https://github.com/GraystackIT/laravel-ship24-api"
+          "url": "https://github.com/GraystackIT/laravel-brave-api"
         }
     ],
     "minimum-stability": "stable",
