@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch;
+namespace GraystackIT\BraveSearch;
 
-use Graystack\BraveSearch\Exceptions\BraveApiException;
+use GraystackIT\BraveSearch\Exceptions\BraveApiException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

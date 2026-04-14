@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch;
+namespace GraystackIT\BraveSearch;
 
-use Graystack\BraveSearch\Connectors\BraveSearchConnector;
-use Graystack\BraveSearch\Data\ImageResult;
-use Graystack\BraveSearch\Exceptions\BraveApiException;
-use Graystack\BraveSearch\Requests\SearchImagesRequest;
+use GraystackIT\BraveSearch\Connectors\BraveSearchConnector;
+use GraystackIT\BraveSearch\Data\ImageResult;
+use GraystackIT\BraveSearch\Exceptions\BraveApiException;
+use GraystackIT\BraveSearch\Requests\SearchImagesRequest;
 use Illuminate\Support\Facades\Log;
 use Saloon\Exceptions\Request\RequestException;
 

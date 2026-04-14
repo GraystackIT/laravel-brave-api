@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch\Data;
+namespace GraystackIT\BraveSearch\Data;
 
 class ImageResult
 {

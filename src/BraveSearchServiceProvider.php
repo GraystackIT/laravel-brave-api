@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch;
+namespace GraystackIT\BraveSearch;
 
-use Graystack\BraveSearch\Connectors\BraveSearchConnector;
+use GraystackIT\BraveSearch\Connectors\BraveSearchConnector;
 use Illuminate\Support\ServiceProvider;
 
 class BraveSearchServiceProvider extends ServiceProvider

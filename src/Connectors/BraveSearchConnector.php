@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch\Connectors;
+namespace GraystackIT\BraveSearch\Connectors;
 
 use Saloon\Http\Connector;
 use Saloon\Traits\Plugins\AcceptsJson;

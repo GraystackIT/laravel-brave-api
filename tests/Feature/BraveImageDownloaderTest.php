@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Graystack\BraveSearch\BraveImageDownloader;
-use Graystack\BraveSearch\Exceptions\BraveApiException;
+use GraystackIT\BraveSearch\BraveImageDownloader;
+use GraystackIT\BraveSearch\Exceptions\BraveApiException;
 use Illuminate\Support\Facades\Http;
 
 it('is resolved from the container', function () {

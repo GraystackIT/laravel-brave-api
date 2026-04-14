@@ -1,5 +1,5 @@
 {
-    "name": "graystack/laravel-brave-api",
+    "name": "graystackit/laravel-brave-api",
     "description": "Laravel package for the Brave Search Images API, built on Saloon 4",
     "type": "library",
     "license": "MIT",
@@ -23,18 +23,18 @@
     },
     "autoload": {
         "psr-4": {
-            "Graystack\\BraveSearch\\": "src/"
+            "GraystackIT\\BraveSearch\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Graystack\\BraveSearch\\Tests\\": "tests/"
+            "GraystackIT\\BraveSearch\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Graystack\\BraveSearch\\BraveSearchServiceProvider"
+                "GraystackIT\\BraveSearch\\BraveSearchServiceProvider"
             ]
         }
     },

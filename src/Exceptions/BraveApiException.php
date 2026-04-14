@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch\Exceptions;
+namespace GraystackIT\BraveSearch\Exceptions;
 
 use RuntimeException;
 

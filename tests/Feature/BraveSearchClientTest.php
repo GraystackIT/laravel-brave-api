@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Graystack\BraveSearch\BraveSearchClient;
-use Graystack\BraveSearch\Connectors\BraveSearchConnector;
-use Graystack\BraveSearch\Data\ImageResult;
-use Graystack\BraveSearch\Exceptions\BraveApiException;
-use Graystack\BraveSearch\Requests\SearchImagesRequest;
+use GraystackIT\BraveSearch\BraveSearchClient;
+use GraystackIT\BraveSearch\Connectors\BraveSearchConnector;
+use GraystackIT\BraveSearch\Data\ImageResult;
+use GraystackIT\BraveSearch\Exceptions\BraveApiException;
+use GraystackIT\BraveSearch\Requests\SearchImagesRequest;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 

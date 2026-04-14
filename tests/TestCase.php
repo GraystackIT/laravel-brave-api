@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch\Tests;
+namespace GraystackIT\BraveSearch\Tests;
 
-use Graystack\BraveSearch\BraveSearchServiceProvider;
+use GraystackIT\BraveSearch\BraveSearchServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase

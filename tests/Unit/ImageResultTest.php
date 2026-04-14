@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Graystack\BraveSearch\Data\ImageResult;
+use GraystackIT\BraveSearch\Data\ImageResult;
 
 it('builds from a full Brave API result item', function () {
     $result = ImageResult::fromArray([

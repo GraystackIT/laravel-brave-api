@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Graystack\BraveSearch\Requests;
+namespace GraystackIT\BraveSearch\Requests;
 
 use Saloon\Enums\Method;
 use Saloon\Http\Request;

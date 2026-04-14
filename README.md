@@ -1,4 +1,4 @@
-# graystack/laravel-brave-api
+# graystackit/laravel-brave-api
 
 A Laravel package for the [Brave Search Images API](https://api.search.brave.com/), built on [Saloon 4](https://docs.saloon.dev/).
 
@@ -10,7 +10,7 @@ A Laravel package for the [Brave Search Images API](https://api.search.brave.com
 ## Installation
 
 ```bash
-composer require graystack/laravel-brave-api
+composer require graystackit/laravel-brave-api
 ```
 
 The service provider is auto-discovered by Laravel.
@@ -58,7 +58,7 @@ return [
 Resolve `BraveSearchClient` from the container or inject it via the constructor:
 
 ```php
-use Graystack\BraveSearch\BraveSearchClient;
+use GraystackIT\BraveSearch\BraveSearchClient;
 
 class ProductController extends Controller
 {
@@ -93,8 +93,8 @@ $results = $brave->searchImages('running shoes', count: 10, options: [
 ### Download an image
 
 ```php
-use Graystack\BraveSearch\BraveImageDownloader;
-use Graystack\BraveSearch\Exceptions\BraveApiException;
+use GraystackIT\BraveSearch\BraveImageDownloader;
+use GraystackIT\BraveSearch\Exceptions\BraveApiException;
 
 class ImageController extends Controller
 {
@@ -139,9 +139,9 @@ $mime = $downloader->detectMimeType($bytes);
 This package uses Saloon's `MockClient` so you can test without making real HTTP calls:
 
 ```php
-use Graystack\BraveSearch\Connectors\BraveSearchConnector;
-use Graystack\BraveSearch\BraveSearchClient;
-use Graystack\BraveSearch\Requests\SearchImagesRequest;
+use GraystackIT\BraveSearch\Connectors\BraveSearchConnector;
+use GraystackIT\BraveSearch\BraveSearchClient;
+use GraystackIT\BraveSearch\Requests\SearchImagesRequest;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 
