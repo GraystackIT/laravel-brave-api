@@ -26,7 +26,7 @@ class SearchImagesRequest extends Request
     {
         return array_merge([
             'q'           => $this->searchQuery,
-            'count'       => min($this->count, 100),
+            'count'       => min($this->count, 200),
             'safesearch'  => 'strict',
             'search_lang' => 'en',
             'country'     => 'us',

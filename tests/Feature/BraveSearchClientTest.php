@@ -67,7 +67,7 @@ it('throws BraveApiException on 401', function () {
         ->toThrow(BraveApiException::class);
 });
 
-it('caps count at 100', function () {
+it('caps count at 200', function () {
     $mockClient = new MockClient([
         SearchImagesRequest::class => MockResponse::make(['results' => []], 200),
     ]);
@@ -82,9 +82,8 @@ it('caps count at 100', function () {
     $lastRequest = $mockClient->getLastRequest();
     expect($lastRequest)->toBeInstanceOf(SearchImagesRequest::class);
 
-    // Resolve query by sending to a pending request and inspecting defaultQuery
     $reflection = new ReflectionMethod($lastRequest, 'defaultQuery');
     $query = $reflection->invoke($lastRequest);
 
-    expect((int) $query['count'])->toBe(100);
+    expect((int) $query['count'])->toBe(200);
 });
