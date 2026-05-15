@@ -5,6 +5,7 @@ declare(strict_types=1);
 use GraystackIT\BraveSearch\BraveSearchClient;
 use GraystackIT\BraveSearch\Connectors\BraveSearchConnector;
 use GraystackIT\BraveSearch\Data\ImageResult;
+use GraystackIT\BraveSearch\Enums\SafeSearch;
 use GraystackIT\BraveSearch\Exceptions\BraveApiException;
 use GraystackIT\BraveSearch\Requests\SearchImagesRequest;
 use Saloon\Http\Faking\MockClient;
@@ -86,4 +87,56 @@ it('caps count at 200', function () {
     $query = $reflection->invoke($lastRequest);
 
     expect((int) $query['count'])->toBe(200);
+});
+
+it('passes safesearch param to image request', function () {
+    $mockClient = new MockClient([
+        SearchImagesRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchImages('shoes', safesearch: SafeSearch::Moderate);
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['safesearch'])->toBe('moderate');
+});
+
+it('passes search_lang and country to image request', function () {
+    $mockClient = new MockClient([
+        SearchImagesRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchImages('shoes', searchLang: 'de', country: 'de');
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['search_lang'])->toBe('de')
+        ->and($query['country'])->toBe('de');
+});
+
+it('uses strict safesearch by default for images', function () {
+    $mockClient = new MockClient([
+        SearchImagesRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchImages('shoes');
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['safesearch'])->toBe('strict');
 });

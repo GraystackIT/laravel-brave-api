@@ -7,8 +7,11 @@ namespace GraystackIT\BraveSearch;
 use GraystackIT\BraveSearch\Connectors\BraveSearchConnector;
 use GraystackIT\BraveSearch\Data\ImageResult;
 use GraystackIT\BraveSearch\Data\NewsResult;
+use GraystackIT\BraveSearch\Data\RichResultHint;
+use GraystackIT\BraveSearch\Data\SpellcheckInfo;
 use GraystackIT\BraveSearch\Data\VideoResult;
 use GraystackIT\BraveSearch\Data\WebResult;
+use GraystackIT\BraveSearch\Data\WebSearchResponse;
 use GraystackIT\BraveSearch\Enums\Freshness;
 use GraystackIT\BraveSearch\Enums\SafeSearch;
 use GraystackIT\BraveSearch\Exceptions\BraveApiException;
@@ -26,19 +29,32 @@ class BraveSearchClient
     /**
      * Search for images using the Brave Search API.
      *
-     * @param  string  $query   The search query
-     * @param  int     $count   Number of results (max 200)
-     * @param  array<string, mixed>  $options  Extra query parameters to override defaults
+     * @param  string     $query       The search query
+     * @param  int        $count       Number of results (max 200)
+     * @param  SafeSearch $safesearch  Safe search level (default: strict)
+     * @param  string     $searchLang  Language code (e.g. 'en')
+     * @param  string     $country     Country code (e.g. 'us')
+     * @param  bool       $spellcheck  Enable spell-check correction
+     * @param  array<string, mixed>  $options  Extra query parameters
      * @return ImageResult[]
      *
      * @throws BraveApiException
      */
-    public function searchImages(string $query, int $count = 20, array $options = []): array
-    {
+    public function searchImages(
+        string $query,
+        int $count = 20,
+        SafeSearch $safesearch = SafeSearch::Strict,
+        string $searchLang = 'en',
+        string $country = 'us',
+        bool $spellcheck = true,
+        array $options = [],
+    ): array {
         Log::info('BraveSearch: searching images', ['query' => $query, 'count' => $count]);
 
         try {
-            $response = $this->connector->send(new SearchImagesRequest($query, $count, $options));
+            $response = $this->connector->send(
+                new SearchImagesRequest($query, $count, $safesearch, $searchLang, $country, $spellcheck, $options)
+            );
         } catch (RequestException $e) {
             Log::error('BraveSearch: API request failed', [
                 'query'  => $query,
@@ -76,16 +92,19 @@ class BraveSearchClient
     /**
      * Search the web using the Brave Search API.
      *
-     * @param  string      $query       The search query (required, non-empty)
-     * @param  int         $count       Number of results (max 20)
-     * @param  int         $offset      Pagination offset
-     * @param  SafeSearch  $safesearch  Safe search level
-     * @param  string      $searchLang  Language code (e.g. 'en')
-     * @param  string      $country     Country code (e.g. 'us')
-     * @param  Freshness|null  $freshness  Restrict results by recency
-     * @param  bool        $spellcheck  Enable spell-check correction
-     * @param  array<string, mixed>  $options  Extra query parameters to override defaults
-     * @return WebResult[]
+     * @param  string                $query               The search query (required, non-empty)
+     * @param  int                   $count               Number of results (max 20)
+     * @param  int                   $offset              Pagination offset (max 9)
+     * @param  SafeSearch            $safesearch          Safe search level
+     * @param  string                $searchLang          Language code (e.g. 'en')
+     * @param  string                $country             Country code (e.g. 'us')
+     * @param  Freshness|string|null $freshness           Recency filter; enum or custom range (e.g. '2024-01-01to2024-12-31')
+     * @param  bool                  $spellcheck          Enable spell-check correction
+     * @param  string|null           $uiLang              UI language (e.g. 'en-US')
+     * @param  bool                  $extraSnippets       Request up to 5 extra snippets per result
+     * @param  string|null           $gogglesId           Goggle URL or inline definition for custom re-ranking
+     * @param  bool                  $enableRichCallback  Enable rich result hints in response
+     * @param  array<string, mixed>  $options             Extra query parameters
      *
      * @throws \InvalidArgumentException
      * @throws BraveApiException
@@ -97,10 +116,14 @@ class BraveSearchClient
         SafeSearch $safesearch = SafeSearch::Moderate,
         string $searchLang = 'en',
         string $country = 'us',
-        ?Freshness $freshness = null,
+        Freshness|string|null $freshness = null,
         bool $spellcheck = true,
+        ?string $uiLang = null,
+        bool $extraSnippets = false,
+        ?string $gogglesId = null,
+        bool $enableRichCallback = false,
         array $options = [],
-    ): array {
+    ): WebSearchResponse {
         if (trim($query) === '') {
             throw new \InvalidArgumentException('Search query must not be empty.');
         }
@@ -109,7 +132,11 @@ class BraveSearchClient
 
         try {
             $response = $this->connector->send(
-                new SearchWebRequest($query, $count, $offset, $safesearch, $searchLang, $country, $freshness, $spellcheck, $options)
+                new SearchWebRequest(
+                    $query, $count, $offset, $safesearch, $searchLang, $country,
+                    $freshness, $spellcheck, $uiLang, $extraSnippets, $gogglesId,
+                    $enableRichCallback, $options
+                )
             );
         } catch (RequestException $e) {
             Log::error('BraveSearch: web search API request failed', [
@@ -135,28 +162,37 @@ class BraveSearchClient
             throw new BraveApiException('Brave Search API returned a non-JSON response.');
         }
 
-        $items   = $data['web']['results'] ?? [];
         $results = array_map(
             static fn (array $item) => WebResult::fromArray($item),
-            $items
+            $data['web']['results'] ?? []
         );
+
+        $spellcheckInfo = isset($data['spellcheck']) && is_array($data['spellcheck'])
+            ? SpellcheckInfo::fromArray($data['spellcheck'])
+            : null;
+
+        $locations = $data['locations']['results'] ?? [];
+
+        $richHint = isset($data['rich']) && is_array($data['rich'])
+            ? RichResultHint::fromArray($data['rich'])
+            : null;
 
         Log::info('BraveSearch: web search completed', ['query' => $query, 'results' => count($results)]);
 
-        return $results;
+        return new WebSearchResponse($results, $spellcheckInfo, $locations, $richHint);
     }
 
     /**
      * Search for videos using the Brave Search API.
      *
-     * @param  string      $query       The search query (required, non-empty)
-     * @param  int         $count       Number of results (max 20)
-     * @param  int         $offset      Pagination offset
-     * @param  SafeSearch  $safesearch  Safe search level
-     * @param  string      $searchLang  Language code (e.g. 'en')
-     * @param  string      $country     Country code (e.g. 'us')
-     * @param  Freshness|null  $freshness  Restrict results by recency
-     * @param  array<string, mixed>  $options  Extra query parameters to override defaults
+     * @param  string                $query       The search query (required, non-empty)
+     * @param  int                   $count       Number of results (max 50)
+     * @param  int                   $offset      Pagination offset
+     * @param  SafeSearch            $safesearch  Safe search level
+     * @param  string                $searchLang  Language code (e.g. 'en')
+     * @param  string                $country     Country code (e.g. 'us')
+     * @param  Freshness|string|null $freshness   Recency filter; enum or custom range
+     * @param  array<string, mixed>  $options     Extra query parameters
      * @return VideoResult[]
      *
      * @throws \InvalidArgumentException
@@ -169,7 +205,7 @@ class BraveSearchClient
         SafeSearch $safesearch = SafeSearch::Moderate,
         string $searchLang = 'en',
         string $country = 'us',
-        ?Freshness $freshness = null,
+        Freshness|string|null $freshness = null,
         array $options = [],
     ): array {
         if (trim($query) === '') {
@@ -219,15 +255,17 @@ class BraveSearchClient
     /**
      * Search for news articles using the Brave Search API.
      *
-     * @param  string      $query       The search query (required, non-empty)
-     * @param  int         $count       Number of results (max 20)
-     * @param  int         $offset      Pagination offset
-     * @param  SafeSearch  $safesearch  Safe search level
-     * @param  string      $searchLang  Language code (e.g. 'en')
-     * @param  string      $country     Country code (e.g. 'us')
-     * @param  Freshness|null  $freshness  Restrict results by recency
-     * @param  bool        $spellcheck  Enable spell-check correction
-     * @param  array<string, mixed>  $options  Extra query parameters to override defaults
+     * @param  string                $query         The search query (required, non-empty)
+     * @param  int                   $count         Number of results (max 50)
+     * @param  int                   $offset        Pagination offset
+     * @param  SafeSearch            $safesearch    Safe search level
+     * @param  string                $searchLang    Language code (e.g. 'en')
+     * @param  string                $country       Country code (e.g. 'us')
+     * @param  Freshness|string|null $freshness     Recency filter; enum or custom range
+     * @param  bool                  $spellcheck    Enable spell-check correction
+     * @param  bool                  $extraSnippets Request extra snippets per result (AI/Data plans)
+     * @param  string|null           $gogglesId     Goggle URL or inline definition for custom re-ranking
+     * @param  array<string, mixed>  $options       Extra query parameters
      * @return NewsResult[]
      *
      * @throws \InvalidArgumentException
@@ -240,8 +278,10 @@ class BraveSearchClient
         SafeSearch $safesearch = SafeSearch::Moderate,
         string $searchLang = 'en',
         string $country = 'us',
-        ?Freshness $freshness = null,
+        Freshness|string|null $freshness = null,
         bool $spellcheck = true,
+        bool $extraSnippets = false,
+        ?string $gogglesId = null,
         array $options = [],
     ): array {
         if (trim($query) === '') {
@@ -252,7 +292,10 @@ class BraveSearchClient
 
         try {
             $response = $this->connector->send(
-                new SearchNewsRequest($query, $count, $offset, $safesearch, $searchLang, $country, $freshness, $spellcheck, $options)
+                new SearchNewsRequest(
+                    $query, $count, $offset, $safesearch, $searchLang, $country,
+                    $freshness, $spellcheck, $extraSnippets, $gogglesId, $options
+                )
             );
         } catch (RequestException $e) {
             Log::error('BraveSearch: news search API request failed', [

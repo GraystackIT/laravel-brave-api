@@ -107,7 +107,7 @@ it('caps count at 50 for video search', function (): void {
     expect((int) $query['count'])->toBe(50);
 });
 
-it('passes freshness to the video request', function (): void {
+it('passes freshness enum to the video request', function (): void {
     $mockClient = new MockClient([
         SearchVideosRequest::class => MockResponse::make(['results' => []], 200),
     ]);
@@ -122,4 +122,21 @@ it('passes freshness to the video request', function (): void {
     $query       = $reflection->invoke($lastRequest);
 
     expect($query['freshness'])->toBe('pm');
+});
+
+it('accepts a custom freshness date range string for videos', function (): void {
+    $mockClient = new MockClient([
+        SearchVideosRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchVideos('laravel', freshness: '2024-01-01to2024-06-30');
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['freshness'])->toBe('2024-01-01to2024-06-30');
 });

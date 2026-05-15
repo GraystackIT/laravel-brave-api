@@ -20,8 +20,10 @@ class SearchNewsRequest extends Request
         private readonly SafeSearch $safesearch = SafeSearch::Moderate,
         private readonly string $searchLang = 'en',
         private readonly string $country = 'us',
-        private readonly ?Freshness $freshness = null,
+        private readonly Freshness|string|null $freshness = null,
         private readonly bool $spellcheck = true,
+        private readonly bool $extraSnippets = false,
+        private readonly ?string $gogglesId = null,
         private readonly array $options = [],
     ) {}
 
@@ -43,7 +45,17 @@ class SearchNewsRequest extends Request
         ];
 
         if ($this->freshness !== null) {
-            $query['freshness'] = $this->freshness->value;
+            $query['freshness'] = $this->freshness instanceof Freshness
+                ? $this->freshness->value
+                : $this->freshness;
+        }
+
+        if ($this->extraSnippets) {
+            $query['extra_snippets'] = true;
+        }
+
+        if ($this->gogglesId !== null) {
+            $query['goggles_id'] = $this->gogglesId;
         }
 
         return array_merge($query, $this->options);

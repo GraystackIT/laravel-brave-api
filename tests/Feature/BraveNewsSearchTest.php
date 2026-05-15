@@ -105,7 +105,7 @@ it('caps count at 50 for news search', function (): void {
     expect((int) $query['count'])->toBe(50);
 });
 
-it('passes freshness to the news request', function (): void {
+it('passes freshness enum to the news request', function (): void {
     $mockClient = new MockClient([
         SearchNewsRequest::class => MockResponse::make(['results' => []], 200),
     ]);
@@ -120,6 +120,57 @@ it('passes freshness to the news request', function (): void {
     $query       = $reflection->invoke($lastRequest);
 
     expect($query['freshness'])->toBe('pd');
+});
+
+it('accepts a custom freshness date range string for news', function (): void {
+    $mockClient = new MockClient([
+        SearchNewsRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchNews('laravel', freshness: '2024-06-01to2024-06-30');
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['freshness'])->toBe('2024-06-01to2024-06-30');
+});
+
+it('sends extra_snippets param for news when enabled', function (): void {
+    $mockClient = new MockClient([
+        SearchNewsRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchNews('laravel', extraSnippets: true);
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['extra_snippets'])->toBeTrue();
+});
+
+it('sends goggles_id param for news when set', function (): void {
+    $mockClient = new MockClient([
+        SearchNewsRequest::class => MockResponse::make(['results' => []], 200),
+    ]);
+
+    $connector = app(BraveSearchConnector::class);
+    $connector->withMockClient($mockClient);
+
+    (new BraveSearchClient($connector))->searchNews('laravel', gogglesId: 'https://example.com/news.goggle');
+
+    $lastRequest = $mockClient->getLastRequest();
+    $reflection  = new ReflectionMethod($lastRequest, 'defaultQuery');
+    $query       = $reflection->invoke($lastRequest);
+
+    expect($query['goggles_id'])->toBe('https://example.com/news.goggle');
 });
 
 it('handles breaking news flag', function (): void {

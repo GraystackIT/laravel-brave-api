@@ -20,7 +20,7 @@ class SearchVideosRequest extends Request
         private readonly SafeSearch $safesearch = SafeSearch::Moderate,
         private readonly string $searchLang = 'en',
         private readonly string $country = 'us',
-        private readonly ?Freshness $freshness = null,
+        private readonly Freshness|string|null $freshness = null,
         private readonly array $options = [],
     ) {}
 
@@ -41,7 +41,9 @@ class SearchVideosRequest extends Request
         ];
 
         if ($this->freshness !== null) {
-            $query['freshness'] = $this->freshness->value;
+            $query['freshness'] = $this->freshness instanceof Freshness
+                ? $this->freshness->value
+                : $this->freshness;
         }
 
         return array_merge($query, $this->options);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GraystackIT\BraveSearch\Requests;
 
+use GraystackIT\BraveSearch\Enums\SafeSearch;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 
@@ -14,6 +15,10 @@ class SearchImagesRequest extends Request
     public function __construct(
         private readonly string $searchQuery,
         private readonly int $count = 20,
+        private readonly SafeSearch $safesearch = SafeSearch::Strict,
+        private readonly string $searchLang = 'en',
+        private readonly string $country = 'us',
+        private readonly bool $spellcheck = true,
         private readonly array $options = [],
     ) {}
 
@@ -27,10 +32,10 @@ class SearchImagesRequest extends Request
         return array_merge([
             'q'           => $this->searchQuery,
             'count'       => min($this->count, 200),
-            'safesearch'  => 'strict',
-            'search_lang' => 'en',
-            'country'     => 'us',
-            'spellcheck'  => 1,
+            'safesearch'  => $this->safesearch->value,
+            'search_lang' => $this->searchLang,
+            'country'     => $this->country,
+            'spellcheck'  => $this->spellcheck ? 1 : 0,
         ], $this->options);
     }
 }
