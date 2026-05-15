@@ -16,7 +16,7 @@ class TestCase extends OrchestraTestCase
 
     protected function defineEnvironment($app): void
     {
-        $app['config']->set('brave-search.api_key', 'test-api-key');
-        $app['config']->set('brave-search.base_url', 'https://api.search.brave.com');
+        $app['config']->set('brave-search.api_key',  config('brave-search.api_key'));
+        $app['config']->set('brave-search.base_url',  config('brave-search.base_url'));
     }
 }
